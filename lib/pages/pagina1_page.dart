@@ -1,17 +1,38 @@
-// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors, sized_box_for_whitespace, prefer_const_literals_to_create_immutables
-
+import 'package:estados/models/usuario.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:estados/bloc/user/user_bloc.dart';
 
 class Pagina1Page extends StatelessWidget {
+  const Pagina1Page({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pagina1'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () {
+              BlocProvider.of<UserBloc>(context, listen: false)
+                  .add(DeleteUser());
+            },
+          )
+        ],
+        title: const Text('Pagina1'),
       ),
-      body: InformacionUsuario(),
+      body: BlocBuilder<UserBloc, UserState>(
+        builder: (_, state) {
+          return state.existUser
+              ? InformacionUsuario(user: state.user!)
+              : const Center(
+                  child: Text('No hay usuario seleccionado'),
+                );
+        },
+      ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.accessibility_new),
+        child: const Icon(Icons.accessibility_new),
         onPressed: () => Navigator.pushNamed(context, 'pagina2'),
       ),
     );
@@ -19,8 +40,10 @@ class Pagina1Page extends StatelessWidget {
 }
 
 class InformacionUsuario extends StatelessWidget {
+  final Usuario user;
   const InformacionUsuario({
     Key? key,
+    required this.user,
   }) : super(key: key);
 
   @override
@@ -28,25 +51,26 @@ class InformacionUsuario extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      padding: EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'General',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          Divider(color: Colors.black, height: 0.1),
-          ListTile(title: Text('Nombre: ')),
-          ListTile(title: Text('Edad: ')),
-          Text(
-            'Profeciones',
+          const Divider(color: Colors.black, height: 0.1),
+          ListTile(title: Text('Nombre: ${user.nombre}')),
+          ListTile(title: Text('Edad: ${user.edad}')),
+          const Text(
+            'Profesiones',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          Divider(color: Colors.black, height: 0.4),
-          ListTile(title: Text('Profesion 1: ')),
-          ListTile(title: Text('Profesion 2: ')),
-          ListTile(title: Text('Profesion 3: ')),
+          const Divider(color: Colors.black, height: 0.4),
+          ...user.profesiones.map((e) => ListTile(title: Text(e))).toList()
+          // ListTile(title: Text('Profesion 1: ')),
+          // ListTile(title: Text('Profesion 2: ')),
+          // ListTile(title: Text('Profesion 3: ')),
         ],
       ),
     );
